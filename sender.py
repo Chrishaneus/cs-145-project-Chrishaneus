@@ -25,7 +25,7 @@ intentMessage   = "ID" + args['i']
 clientSock.sendto(intentMessage.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
 
 transactionID, addr = clientSock.recvfrom(1024)
-if len(data) > 0:
+if len(transactionID) > 0:
 		print("transaction ID:", transactionID.decode())
 
 
