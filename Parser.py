@@ -1,5 +1,6 @@
 import sys
 import ipaddress
+import hashlib
 from os.path import exists
 
 args = {    'f' : '',
@@ -62,3 +63,17 @@ def check_args(arguments):
         if arg == 'i' and not arguments[arg].isalnum():
             print("Not a valid ID!")
             sys.exit()
+
+# PARSE PACKETS
+def parse_packet(data):
+    return (data[2:10], data[12:19], data[22:29], data[33], data[34:])
+
+# PARSE ACKNOWLEDGEMENTS
+def parse_ack(ack):
+    return (ack[3:10], ack[13:20], ack[23:])
+
+# HASHING
+def compute_checksum(packet):
+	return hashlib.md5(packet.encode('utf-8')).hexdigest()
+
+    
