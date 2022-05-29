@@ -6,5 +6,5 @@ def add(text):
 def clear():
     open('log.txt', 'w').close()
 
-f = open("log.txt", "r")
-print(f.read())
+def read():
+    open('log.txt', 'r').read()
