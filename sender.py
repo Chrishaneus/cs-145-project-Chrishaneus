@@ -33,7 +33,7 @@ intentMessage   = "ID" + args['i']
 clientSock.sendto(intentMessage.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
 transactionID, addr = clientSock.recvfrom(1024)
 transactionID = transactionID.decode()
-log.add(transactionID)
+log.add(transactionID+"|"+UDP_IP_ADDRESS)
 
 # Initialize hidden
 PAYLOAD_SIZE 	= 1
@@ -55,7 +55,6 @@ while True:
 
     # Sequence Number, Transaction Number, Z
     sn, z, pl = f'{seqnum:07d}', '0', payload[0:PAYLOAD_SIZE]
-    print(PAYLOAD_SIZE)
 
     # Last Packet
     if not payload[PAYLOAD_SIZE:]:
@@ -67,14 +66,27 @@ while True:
     QUEUE[sn] = build_message
 
     # Check Acknowledgement
-    try:  ack, addr = clientSock.recvfrom(1024)
+    try:  
+        ack, addr = clientSock.recvfrom(1024)
+        print(build_message)
     except:
+        PROCESSING += 1
         if MODE == 0:
             PAYLOAD_SIZE = PAYLOAD_SIZE//2
-            MODE = 1; continue
+            MODE = 1
+            continue
         if MODE == 1:
+            PAYLOAD_SIZE = PAYLOAD_SIZE-10
+            MODE = 2
+            continue
+        if MODE == 2:
+            PAYLOAD_SIZE = PAYLOAD_SIZE-5
+            MODE = 3
+            continue
+        if MODE == 3:
             PAYLOAD_SIZE = PAYLOAD_SIZE-1
-            MODE = 2; continue
+            MODE = 4
+            continue
     
     snServer, txnServer, chksum = argsp.parse_ack(ack.decode())
 
@@ -84,13 +96,15 @@ while True:
 
     # Processing delay
     if PAYLOAD_SIZE == 1:
-        PROCESSING = time.time() - start_time + 2
+        PROCESSING = time.time() - start_time + 1
         clientSock.settimeout(PROCESSING)
         print("Delay:", PROCESSING)
         
     # Altered binary exponential backoff
     if MODE == 0: PAYLOAD_SIZE *= 2
-    if MODE == 1: PAYLOAD_SIZE += 1
+    if MODE == 1: PAYLOAD_SIZE += 10
+    if MODE == 2: PAYLOAD_SIZE += 5
+    if MODE == 3: PAYLOAD_SIZE += 1
 
     # next packet
     payload = payload[PAYLOAD_SIZE:]
