@@ -100,15 +100,15 @@ while True:
         clientSock.settimeout(PROCESSING)
         print("Delay:", PROCESSING)
         
+    # next packet
+    payload = payload[PAYLOAD_SIZE:]
+    seqnum = seqnum + 1
+    
     # Altered binary exponential backoff
     if MODE == 0: PAYLOAD_SIZE *= 2
     if MODE == 1: PAYLOAD_SIZE += 10
     if MODE == 2: PAYLOAD_SIZE += 5
     if MODE == 3: PAYLOAD_SIZE += 1
-
-    # next packet
-    payload = payload[PAYLOAD_SIZE:]
-    seqnum = seqnum + 1
 
     if z == '1':
         break
