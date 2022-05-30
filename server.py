@@ -55,7 +55,7 @@ payload = "\n".join(lines)
 PAYLOAD_SIZE 	= random.randint(64,80)
 QUEUE			= []
 QUEUE_SIZE		= random.randint(4,8)
-PROCESSING		= random.uniform(5,10)
+PROCESSING		= random.uniform(8,10)
 PAYLOAD			= ""
 SEQNUM			= 0
 print(PAYLOAD_SIZE,PROCESSING,QUEUE_SIZE)

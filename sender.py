@@ -37,17 +37,18 @@ log.add(transactionID+"|"+UDP_IP_ADDRESS)
 
 # Initialize hidden
 PROCESSING      = 20
-INIT_PSIZE      = 16
+INIT_PSIZE      = int(sum(map(len, lines))*0.08)
 PAYLOAD_SIZE    = INIT_PSIZE
 VALID_PSIZE     = 1
-PSIZE_RATIO     = 0
 MODE            = 0         # Ethernet’s binary exponential
 QUEUE           = []
 QUEUE_SIZE      = 1
 QUEUE_MODE      = 0         # AIMD approach to congestion control
 VALID_QSIZE     = 1
+
+PSIZE_RATIO     = 0
 QSIZE_RATIO     = 0
-RATIO           = [2,1.75,1.5,1.25,1,0.75]
+RATIO           = [0.5,0.25,0.1,0.0]
 
 # Set variables
 seqnum, id, txn = 0, args['i'], transactionID
@@ -98,7 +99,7 @@ while True:
 
             # Processing delay
             if PAYLOAD_SIZE == INIT_PSIZE:
-                PROCESSING = time.time() - start_time + 0.5
+                PROCESSING = time.time() - start_time + 0.25
                 clientSock.settimeout(PROCESSING)
                 print("Delay:", PROCESSING)
                 
@@ -110,8 +111,11 @@ while True:
             # Altered binary exponential backoff
             if payloadChange:
                 VALID_PSIZE = PAYLOAD_SIZE
-                PAYLOAD_SIZE *= RATIO[PSIZE_RATIO]
-                PAYLOAD_SIZE = int(PAYLOAD_SIZE)
+                PAYLOAD_SIZE *= 2
+                payloadChange = 0
+            if payloadChange:
+                VALID_PSIZE = PAYLOAD_SIZE
+                PAYLOAD_SIZE += int(PAYLOAD_SIZE*RATIO[PSIZE_RATIO])
                 payloadChange = 0
 
             # Altered AIMD approach
