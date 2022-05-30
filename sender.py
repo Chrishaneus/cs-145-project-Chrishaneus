@@ -60,7 +60,6 @@ start_time = time.time()
 while True:
     queueCounter = 0
     payloadChange = 1
-    PREV_PSIZE = 0
     breakOuter = 0
 
     for i in range(QUEUE_SIZE):
@@ -130,8 +129,8 @@ while True:
         except:
             QUEUE = []
             if queueCounter == 0:
-		PSIZE_RATIO += 1
-                PAYLOAD_SIZE = VALID_PSIZE*RATIO(PSIZE_RATIO)
+                PSIZE_RATIO += 1
+                PAYLOAD_SIZE = VALID_PSIZE*RATIO[PSIZE_RATIO]
                 break
                 # if MODE == 0:
                 #     MODE = 1; break
@@ -141,11 +140,11 @@ while True:
                 QUEUE_SIZE = VALID_QSIZE
                 if QUEUE_MODE == 0:
                     QUEUE_MODE = 1
-		    QUEUE_SIZE += 1
+                    QUEUE_SIZE += 1
                     break
                 if QUEUE_MODE == 1:
                     QUEUE_MODE = 2
-                    break
+                break
                 
     if breakOuter:
         break
