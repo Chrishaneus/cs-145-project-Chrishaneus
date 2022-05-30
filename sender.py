@@ -14,11 +14,11 @@ import log
 
 # Get command line arguments
 args    = argsp.get_args()
-argsp.check_args(args) #; argsp.print_args(args)
+argsp.check_args(args)
 
 # Open file and readline by line
 file    = open(args['f'], 'r')
-lines   = [line for line in file] #print(sum(map(len, lines))) #print(len(max(lines, key=len)))
+lines   = [line for line in file]
 payload = "\n".join(lines)
 file.close()
 
@@ -29,86 +29,116 @@ clientSock      = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 clientSock.bind(('',int(args['c'])))
 
 # Initialize transaction
-intentMessage   = "ID" + args['i']
+intentMessage = "ID" + args['i']
 clientSock.sendto(intentMessage.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
 transactionID, addr = clientSock.recvfrom(1024)
 transactionID = transactionID.decode()
 log.add(transactionID+"|"+UDP_IP_ADDRESS)
 
 # Initialize hidden
-PAYLOAD_SIZE 	= 1
+INIT_PSIZE      = 8
+PAYLOAD_SIZE 	= INIT_PSIZE
 QUEUE_SIZE		= 1
 PROCESSING		= 20
-MODE            = 0             # for implementation of binary exponential backoff
-QUEUE           = {}
-
-# Set timeout
-clientSock.settimeout(PROCESSING)
+MODE            = 0         # Ethernet’s binary exponential
+QUEUE_MODE      = 0         # AIMD approach to congestion control
+QUEUE           = []
 
 # Set variables
 seqnum, id, txn = 0, args['i'], transactionID
 
+# start time
+start_time = time.time()
+
 # Send payload
 while True:
-    # start time
-    start_time = time.time()
+    queueCounter = 0
+    payloadChange = 1
+    PREV_PSIZE = 0
+    breakOuter = 0
 
-    # Sequence Number, Transaction Number, Z
-    sn, z, pl = f'{seqnum:07d}', '0', payload[0:PAYLOAD_SIZE]
+    for i in range(QUEUE_SIZE):
+        # Sequence number, rransaction number, z
+        sn, z, pl = f'{seqnum+i:07d}', '0', payload[PAYLOAD_SIZE*i:PAYLOAD_SIZE*(i+1)]
 
-    # Last Packet
-    if not payload[PAYLOAD_SIZE:]:
-        z = '1'
+        # Adjust z if it is the last packet
+        if not len(payload[PAYLOAD_SIZE*(i+1):]):
+            z = '1'
 
-    # Build and send payload
-    build_message = "ID" + id + "SN" + sn + "TXN" + txn + "LAST" + z + pl
-    clientSock.sendto(build_message.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
-    QUEUE[sn] = build_message
+        # Build and send payload
+        build_message = "ID" + id + "SN" + sn + "TXN" + txn + "LAST" + z + pl
+        clientSock.sendto(build_message.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
+        print('('+str(PAYLOAD_SIZE)+','+str(QUEUE_SIZE)+')\t' + build_message)
 
-    # Check Acknowledgement
-    try:  
-        ack, addr = clientSock.recvfrom(1024)
-        print(build_message)
-    except:
-        PROCESSING += 1
-        if MODE == 0:
-            PAYLOAD_SIZE = PAYLOAD_SIZE//2
-            MODE = 1
-            continue
-        if MODE == 1:
-            PAYLOAD_SIZE = PAYLOAD_SIZE-10
-            MODE = 2
-            continue
-        if MODE == 2:
-            PAYLOAD_SIZE = PAYLOAD_SIZE-5
-            MODE = 3
-            continue
-        if MODE == 3:
-            PAYLOAD_SIZE = PAYLOAD_SIZE-1
-            MODE = 4
-            continue
-    
-    snServer, txnServer, chksum = argsp.parse_ack(ack.decode())
+        # Add to queue
+        QUEUE.append([build_message,z])
 
-    # Checksum
-    if (argsp.compute_checksum(build_message) == chksum): pass
-    QUEUE.pop(sn)
+        if z == '1':
+            break
 
-    # Processing delay
-    if PAYLOAD_SIZE == 1:
-        PROCESSING = time.time() - start_time + 1
-        clientSock.settimeout(PROCESSING)
-        print("Delay:", PROCESSING)
-        
-    # next packet
-    payload = payload[PAYLOAD_SIZE:]
-    seqnum = seqnum + 1
-    
-    # Altered binary exponential backoff
-    if MODE == 0: PAYLOAD_SIZE *= 2
-    if MODE == 1: PAYLOAD_SIZE += 10
-    if MODE == 2: PAYLOAD_SIZE += 5
-    if MODE == 3: PAYLOAD_SIZE += 1
+    for i in range(QUEUE_SIZE):
+        try:
+            # Check acknowledgement
+            ack, addr = clientSock.recvfrom(1024)
+            snServer, txnServer, chksum = argsp.parse_ack(ack.decode())
+            message, z = QUEUE.pop(0)
 
-    if z == '1':
+            # Get current expected message to be acked
+            idMsg, snMsg, txnMsg, zMsg, plMsg = argsp.parse_packet(message)
+            queueCounter += 1
+
+            # Correction checks
+            if (snMsg != snServer): print("sequence number:", snMsg)
+            if (argsp.compute_checksum(message) != chksum): print("checksum:", chksum)
+
+            # Processing delay
+            if PAYLOAD_SIZE == INIT_PSIZE:
+                PROCESSING = time.time() - start_time + 0.5
+                clientSock.settimeout(PROCESSING)
+                print("Delay:", PROCESSING)
+                
+            # next packet
+            if PREV_PSIZE: payload = payload[PREV_PSIZE:]
+            else: payload = payload[PAYLOAD_SIZE:]
+            seqnum += 1
+
+            # Altered binary exponential backoff
+            if MODE == 0 and payloadChange:
+                PREV_PSIZE = PAYLOAD_SIZE
+                PAYLOAD_SIZE *= 2
+                payloadChange = 0
+            if MODE == 1 and payloadChange:
+                PREV_PSIZE = PAYLOAD_SIZE
+                PAYLOAD_SIZE += 1
+                payloadChange = 0
+            if QUEUE_MODE == 0 and queueCounter == QUEUE_SIZE:
+                QUEUE_SIZE *= 2
+            if QUEUE_MODE == 1 and queueCounter == QUEUE_SIZE:
+                QUEUE_SIZE += 1
+
+            # Check if last packet is ACKED
+            if zMsg == '1':
+                breakOuter = 1
+                break
+
+        except:
+            QUEUE = []
+            if queueCounter == 0:
+                if MODE == 0:
+                    PAYLOAD_SIZE = PAYLOAD_SIZE//2
+                    MODE = 1
+                elif MODE == 1:
+                    PAYLOAD_SIZE = PAYLOAD_SIZE-1
+                    MODE = 2
+            elif queueCounter == QUEUE_SIZE:
+                continue
+            else:
+                if QUEUE_MODE == 0:
+                    QUEUE_SIZE = QUEUE_SIZE//2
+                    QUEUE_MODE = 1
+                elif QUEUE_MODE == 1:
+                    QUEUE_SIZE = QUEUE_SIZE-1
+                    QUEUE_MODE = 2
+
+    if breakOuter:
         break
