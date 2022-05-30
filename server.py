@@ -14,7 +14,7 @@ import Parser as argsp
 import log
 
 serverSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-serverSock.settimeout(50.0)
+serverSock.settimeout(30.0)
 serverSock.bind(('',9000))
 
 def debug_payload(id, sn, txn, z, pl):
