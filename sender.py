@@ -37,7 +37,7 @@ log.add(transactionID+"|"+UDP_IP_ADDRESS)
 
 # Initialize hidden
 PROCESSING      = 20
-INIT_PSIZE      = int(sum(map(len, lines))*0.08)
+INIT_PSIZE      = int(sum(map(len, lines))*0.06)
 PAYLOAD_SIZE    = INIT_PSIZE
 VALID_PSIZE     = 1
 MODE            = 0         # Ethernet’s binary exponential
@@ -135,9 +135,9 @@ while True:
             QUEUE = []
             if queueCounter == 0:
                 PAYLOAD_SIZE = VALID_PSIZE
-                if QUEUE_MODE == 0:
-                    QUEUE_MODE = 1; break
-                if QUEUE_MODE == 1:
+                if MODE == 0:
+                    MODE = 1; break
+                if MODE == 1:
                     PSIZE_RATIO += 1; break
             elif queueCounter != QUEUE_SIZE:
                 QUEUE_SIZE = VALID_QSIZE
