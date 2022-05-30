@@ -67,6 +67,7 @@ PAYLOAD = ''
 while True:
     queueCounter = 0
     breakOuter = 0
+    payloadChange = 1
 
     print("=="*100)
 
@@ -100,10 +101,8 @@ while True:
             idMsg, snMsg, txnMsg, zMsg, plMsg = argsp.parse_packet(message)
             queueCounter += 1
 
-            # print(ack.decode())
-            # PAYLOAD += plMsg
-            # if PAYLOAD in "\n".join(lines): print(len(PAYLOAD)*100/len("\n".join(lines)))
-            # else: print(payload,'\n',PAYLOAD)
+            # Check Acked packet
+            print(snServer)
 
             # Correction checks
             if (snMsg != snServer): print("sequence number:", snMsg)
@@ -117,20 +116,18 @@ while True:
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
                 clientSock.settimeout(PROCESSING+1)
-                PAYLOAD_SIZE = int(length//(95/(PROCESSING-0.2)))
+                PAYLOAD_SIZE = int(length//(95/(PROCESSING-0.1)))
                 print("Delay:", PROCESSING, PAYLOAD_SIZE)
             
-            print(snServer)
             # next packet
             # if payloadChange: payload = payload[PAYLOAD_SIZE:]
             # else: payload = payload[VALID_PSIZE:]
             
-
-            # # Altered binary exponential backoff
-            # if payloadChange:
-            #     VALID_PSIZE = PAYLOAD_SIZE
-            #     PAYLOAD_SIZE += int(PAYLOAD_SIZE*RATIO[PSIZE_RATIO])
-            #     payloadChange = 0
+            # Altered binary exponential backoff
+            if MODE == 0 and payloadChange:
+                VALID_PSIZE = PAYLOAD_SIZE
+                PAYLOAD_SIZE += 1
+                payloadChange = 0
 
             # Altered AIMD approach
             if QUEUE_MODE == 0 and queueCounter == QUEUE_SIZE:
@@ -144,15 +141,18 @@ while True:
 
         except:
             QUEUE = []
+            
+            # Payload size error
             if queueCounter == 0:
-                breakOuter = 1
-                print("wrong queue counter!")
-                break
-                PAYLOAD_SIZE -= 1
-                # PSIZE_RATIO += 1
-                # PAYLOAD_SIZE = int(VALID_PSIZE*RATIO[PSIZE_RATIO])
-                # print("No packets sent! Decreased payload size")
-                break
+                if MODE == 0:
+                    MODE = 1
+                    PAYLOAD_SIZE -= 1
+                    break
+                elif MODE == 1:
+                    PAYLOAD_SIZE -= 1
+                    break
+            
+            # Queue size error
             elif queueCounter != QUEUE_SIZE:
                 QUEUE_SIZE = VALID_QSIZE
                 print("packet loss! decreased queue size")
