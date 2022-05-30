@@ -51,11 +51,12 @@ class receiver_thread(threading.Thread):
 file    = open('f64516b9.txt', 'r')
 lines   = [line for line in file] #print(sum(map(len, lines)))
 payload = "\n".join(lines)
+size 	= sum(map(len, lines))
 
-PAYLOAD_SIZE 	= random.randint(64,80)
+PAYLOAD_SIZE 	= random.randint(int(size*0.15),int(size*0.20))
 QUEUE			= []
-QUEUE_SIZE		= random.randint(4,8)
-PROCESSING		= random.uniform(8,10)
+QUEUE_SIZE		= random.randint(2,4)
+PROCESSING		= random.uniform(9,12)
 PAYLOAD			= ""
 SEQNUM			= 0
 print(PAYLOAD_SIZE,PROCESSING,QUEUE_SIZE)
