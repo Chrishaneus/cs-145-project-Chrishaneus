@@ -98,10 +98,10 @@ while True:
             if (argsp.compute_checksum(message) != chksum): print("checksum:", chksum)
 
             # Processing delay
-            if PAYLOAD_SIZE == INIT_PSIZE:
+            if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time + 0.25
                 clientSock.settimeout(PROCESSING)
-                print("Delay:", PROCESSING)
+                print("Delay:", PROCESSING, int(snMsg))
                 
             # next packet
             if payloadChange: payload = payload[PAYLOAD_SIZE:]
