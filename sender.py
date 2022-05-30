@@ -36,13 +36,15 @@ transactionID = transactionID.decode()
 log.add(transactionID+"|"+UDP_IP_ADDRESS)
 
 # Initialize hidden
-INIT_PSIZE      = 8
-PAYLOAD_SIZE 	= INIT_PSIZE
-QUEUE_SIZE		= 1
-PROCESSING		= 20
+PROCESSING      = 20
+INIT_PSIZE      = 16
+PAYLOAD_SIZE    = INIT_PSIZE
+VALID_PSIZE     = 1
 MODE            = 0         # Ethernet’s binary exponential
-QUEUE_MODE      = 0         # AIMD approach to congestion control
 QUEUE           = []
+QUEUE_SIZE      = 1
+QUEUE_MODE      = 0         # AIMD approach to congestion control
+VALID_QSIZE     = 1
 
 # Set variables
 seqnum, id, txn = 0, args['i'], transactionID
@@ -98,22 +100,26 @@ while True:
                 print("Delay:", PROCESSING)
                 
             # next packet
-            if PREV_PSIZE: payload = payload[PREV_PSIZE:]
-            else: payload = payload[PAYLOAD_SIZE:]
+            if payloadChange: payload = payload[PAYLOAD_SIZE:]
+            else: payload = payload[VALID_PSIZE:]
             seqnum += 1
 
             # Altered binary exponential backoff
             if MODE == 0 and payloadChange:
-                PREV_PSIZE = PAYLOAD_SIZE
+                VALID_PSIZE = PAYLOAD_SIZE
                 PAYLOAD_SIZE *= 2
                 payloadChange = 0
             if MODE == 1 and payloadChange:
-                PREV_PSIZE = PAYLOAD_SIZE
+                VALID_PSIZE = PAYLOAD_SIZE
                 PAYLOAD_SIZE += 1
                 payloadChange = 0
+
+            # Altered AIMD approach
             if QUEUE_MODE == 0 and queueCounter == QUEUE_SIZE:
+                VALID_QSIZE = QUEUE_SIZE
                 QUEUE_SIZE *= 2
             if QUEUE_MODE == 1 and queueCounter == QUEUE_SIZE:
+                VALID_QSIZE = QUEUE_SIZE
                 QUEUE_SIZE += 1
 
             # Check if last packet is ACKED
@@ -124,21 +130,19 @@ while True:
         except:
             QUEUE = []
             if queueCounter == 0:
+                PAYLOAD_SIZE = VALID_PSIZE
                 if MODE == 0:
-                    PAYLOAD_SIZE = PAYLOAD_SIZE//2
-                    MODE = 1
-                elif MODE == 1:
-                    PAYLOAD_SIZE = PAYLOAD_SIZE-1
-                    MODE = 2
+                    MODE = 1; break
+                if MODE == 1:
+                    MODE = 2; break
             elif queueCounter == QUEUE_SIZE:
                 continue
             else:
+                QUEUE_SIZE = VALID_QSIZE
                 if QUEUE_MODE == 0:
-                    QUEUE_SIZE = QUEUE_SIZE//2
-                    QUEUE_MODE = 1
-                elif QUEUE_MODE == 1:
-                    QUEUE_SIZE = QUEUE_SIZE-1
-                    QUEUE_MODE = 2
+                    QUEUE_MODE = 1; break
+                if QUEUE_MODE == 1:
+                    QUEUE_MODE = 2; break
 
     if breakOuter:
         break

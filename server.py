@@ -48,10 +48,14 @@ class receiver_thread(threading.Thread):
 			except:
 				break
 
+file    = open('f64516b9.txt', 'r')
+lines   = [line for line in file] #print(sum(map(len, lines)))
+payload = "\n".join(lines)
+
 PAYLOAD_SIZE 	= random.randint(64,80)
 QUEUE			= []
-QUEUE_SIZE		= random.randint(8,16)
-PROCESSING		= random.uniform(1,2)
+QUEUE_SIZE		= random.randint(4,8)
+PROCESSING		= random.uniform(5,10)
 PAYLOAD			= ""
 SEQNUM			= 0
 print(PAYLOAD_SIZE,PROCESSING,QUEUE_SIZE)
@@ -62,7 +66,7 @@ receiverThread.start()
 while True:
 	# empty queue
 	while(len(QUEUE) == 0):
-		pass
+		if time.time()-start_time > 120: break
 
 	# time limit
 	if time.time()-start_time > 120:
@@ -108,10 +112,6 @@ while True:
 		# Last Packet
 		if z == '1':
 			break
-
-file    = open('f64516b9.txt', 'r')
-lines   = [line for line in file] #print(sum(map(len, lines)))
-payload = "\n".join(lines)
 
 print(time.time()-start_time)
 
