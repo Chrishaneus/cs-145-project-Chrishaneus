@@ -76,4 +76,12 @@ def parse_ack(ack):
 def compute_checksum(packet):
 	return hashlib.md5(packet.encode('utf-8')).hexdigest()
 
+def debug_payload(id, sn, txn, z, pl):
+		print("ID  :",id)
+		print("SN  :",sn)
+		print("TNX :",txn)
+		print("Z   :",z)
+		print("PL  :",pl)
+		print("====="*10)
+
     

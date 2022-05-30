@@ -17,14 +17,6 @@ serverSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 serverSock.settimeout(30.0)
 serverSock.bind(('',9000))
 
-def debug_payload(id, sn, txn, z, pl):
-		print("ID  :",id)
-		print("SN  :",sn)
-		print("TNX :",txn)
-		print("Z   :",z)
-		print("PL  :",pl)
-		print("====="*10)
-
 start_time = 10 * time.time()
 queueLock = threading.Lock()
 
@@ -51,14 +43,16 @@ class receiver_thread(threading.Thread):
 file    = open('f64516b9.txt', 'r')
 lines   = [line for line in file] #print(sum(map(len, lines)))
 payload = "\n".join(lines)
-size 	= sum(map(len, lines))
+length 	= sum(map(len, lines))
 
-PAYLOAD_SIZE 	= random.randint(int(size*0.15),int(size*0.20))
+
 QUEUE			= []
 QUEUE_SIZE		= random.randint(2,4)
-PROCESSING		= random.uniform(9,12)
+PROCESSING		= random.uniform(5,12)
+PAYLOAD_SIZE 	= int(length//(95/PROCESSING))
 PAYLOAD			= ""
 SEQNUM			= 0
+
 print(PAYLOAD_SIZE,PROCESSING,QUEUE_SIZE)
 
 receiverThread = receiver_thread(0, "receiver", QUEUE, QUEUE_SIZE)
@@ -91,11 +85,12 @@ while True:
 
 		# Incorrect payload size
 		if len(pl) > PAYLOAD_SIZE:
+			print('wrong payload size!')
 			continue
 		
 		# Incorrect expected sequence number
 		if f'{SEQNUM:07d}' != sn:
-			print(f'{SEQNUM:07d}',sn)
+			print('not the expected sequence number!',f'{SEQNUM:07d}',sn)
 			continue
 
 		# Processing Delay
@@ -122,5 +117,6 @@ elif PAYLOAD in payload:
 	print("sent "+str(len(PAYLOAD)*100/len(payload))+f"% of the payload")
 else:
 	print("Failed to send data")
+	print(PAYLOAD)
 
 receiverThread.join()
