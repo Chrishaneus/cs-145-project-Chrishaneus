@@ -109,11 +109,11 @@ while True:
             seqnum += 1
 
             # Altered binary exponential backoff
-            if payloadChange:
+            if MODE == 0 and payloadChange:
                 VALID_PSIZE = PAYLOAD_SIZE
                 PAYLOAD_SIZE *= 2
                 payloadChange = 0
-            if payloadChange:
+            if MODE == 1 and payloadChange:
                 VALID_PSIZE = PAYLOAD_SIZE
                 PAYLOAD_SIZE += int(PAYLOAD_SIZE*RATIO[PSIZE_RATIO])
                 payloadChange = 0
@@ -135,8 +135,10 @@ while True:
             QUEUE = []
             if queueCounter == 0:
                 PAYLOAD_SIZE = VALID_PSIZE
-                PSIZE_RATIO += 1
-                break
+                if QUEUE_MODE == 0:
+                    QUEUE_MODE = 1; break
+                if QUEUE_MODE == 1:
+                    PSIZE_RATIO += 1; break
             elif queueCounter != QUEUE_SIZE:
                 QUEUE_SIZE = VALID_QSIZE
                 if QUEUE_MODE == 0:
