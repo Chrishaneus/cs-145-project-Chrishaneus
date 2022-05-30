@@ -48,7 +48,7 @@ VALID_QSIZE     = 1
 
 PSIZE_RATIO     = 0
 QSIZE_RATIO     = 0
-RATIO           = [1,0.5,0.25,0.1,0.0]
+RATIO           = [0.75,0.25,0.1,0.05,0.0]
 
 # Set variables
 seqnum, id, txn = 0, args['i'], transactionID
