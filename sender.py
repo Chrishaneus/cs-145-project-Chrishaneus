@@ -128,7 +128,7 @@ while payload:
             # Update payload and sequence number
             payload = payload[size:]
 
-            # Adjust queue size
+            # Adjust queue size (NOTE FOR TOMORROW: DO NOT STARTING FROM PACKET 1 IF TIME > 5)
             if QUEUE_MODE == 0:
                 queueCounter += 1
                 QUEUE_SIZE += 1
