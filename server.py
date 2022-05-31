@@ -69,7 +69,7 @@ while True:
 	
 	# get data
 	queueLock.acquire()
-	data, addr = QUEUE.pop(0)
+	data, addr = QUEUE[0]
 	queueLock.release()
 
 	# Step Two: Initiating a Transaction
@@ -78,6 +78,7 @@ while True:
 		print("intent message:", data)
 		transactionID = ''.join(random.choice(string.digits) for _ in range(7))
 		serverSock.sendto(transactionID.encode(), (addr[0], addr[1]))
+		QUEUE.pop(0)
 
 	# Step Three: Sending the Payload or Data
 	if len(data) > 10:
@@ -85,11 +86,13 @@ while True:
 
 		# Incorrect payload size
 		if len(pl) > PAYLOAD_SIZE:
+			QUEUE.pop(0)
 			print('wrong payload size!')
 			continue
 		
 		# Incorrect expected sequence number
 		if f'{SEQNUM:07d}' != sn:
+			QUEUE.pop(0)
 			print('not the expected sequence number!',f'{SEQNUM:07d}',sn)
 			continue
 
@@ -104,6 +107,8 @@ while True:
 
 		# Update expected sequence number
 		SEQNUM += 1
+
+		QUEUE.pop(0)
 
 		# Last Packet
 		if z == '1':

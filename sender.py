@@ -29,13 +29,6 @@ UDP_PORT_NO     = int(args['s'])
 clientSock      = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 clientSock.bind(('',int(args['c'])))
 
-# Initialize transaction
-intentMessage = "ID" + args['i']
-clientSock.sendto(intentMessage.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
-transactionID, addr = clientSock.recvfrom(1024)
-transactionID = transactionID.decode()
-log.add(transactionID+"|"+UDP_IP_ADDRESS)
-
 # Processing
 PROCESSING      = 20
 
@@ -44,6 +37,7 @@ INIT_PSIZE      = 1
 PAYLOAD_SIZE    = INIT_PSIZE
 VALID_PSIZE     = 1
 MODE            = 0
+PL_FACTOR       = 1
 
 # Queue Logic
 QUEUE           = []
@@ -51,9 +45,14 @@ QUEUE_SIZE      = 1
 QUEUE_MODE      = 0
 VALID_QSIZE     = 1
 
-# PSIZE_RATIO     = 0
-# QSIZE_RATIO     = 0
-# RATIO           = [1,0.25,0.0625,0.0]
+# Initialize transaction
+intentMessage = "ID" + args['i']
+latency_time = time.time()
+clientSock.sendto(intentMessage.encode(), (UDP_IP_ADDRESS,UDP_PORT_NO))
+transactionID, addr = clientSock.recvfrom(1024)
+latency = time.time() - latency_time
+transactionID = transactionID.decode()
+log.add(transactionID+"|"+UDP_IP_ADDRESS)
 
 # Set variables
 seqnum, id, txn = 0, args['i'], transactionID
@@ -61,15 +60,13 @@ seqnum, id, txn = 0, args['i'], transactionID
 # start time
 start_time = time.time()
 
-PAYLOAD = ''
-
 # Send payload
 while True:
     queueCounter = 0
-    breakOuter = 0
     payloadChange = 1
+    breakOuter = 0
 
-    print("=="*100)
+    print("=="*50)
 
     for i in range(QUEUE_SIZE):
         # Sequence number, rransaction number, z
@@ -116,22 +113,22 @@ while True:
             # Processing delay
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
-                clientSock.settimeout(PROCESSING+1)
-                PAYLOAD_SIZE = int(length//(95/(PROCESSING-0.1)))
+                clientSock.settimeout(PROCESSING+latency)
+                PAYLOAD_SIZE = int(length//(95/(PROCESSING-latency)))
                 payloadChange = 0
                 print("Delay:", PROCESSING, PAYLOAD_SIZE)
             
-            # next packet
-            # if payloadChange: payload = payload[PAYLOAD_SIZE:]
-            # else: payload = payload[VALID_PSIZE:]
-            
-            # Altered binary exponential backoff
-            if MODE == 0 and payloadChange:
-                VALID_PSIZE = PAYLOAD_SIZE
-                PAYLOAD_SIZE += 1
-                payloadChange = 0
+            # # Find actual payload size
+            # if MODE == 0 and payloadChange:
+            #     VALID_PSIZE = PAYLOAD_SIZE
+            #     PAYLOAD_SIZE += 1
+            #     payloadChange = 0
+            # if MODE == 2 and payloadChange:
+            #     VALID_PSIZE = PAYLOAD_SIZE
+            #     payloadChange = 0
+            #     MODE = 0
 
-            # Altered AIMD approach
+            # Increment QUEUE
             if QUEUE_MODE == 0 and queueCounter == QUEUE_SIZE:
                 VALID_QSIZE = QUEUE_SIZE
                 QUEUE_SIZE += 1
@@ -146,13 +143,17 @@ while True:
             
             # Payload size error
             if queueCounter == 0:
-                if MODE == 0:
+                # Wrong payload guess from SN 0
+                if MODE == 0 and seqnum == 1:
+                    PAYLOAD_SIZE -= PL_FACTOR
+                    PL_FACTOR = PL_FACTOR*2
+                    QUEUE_SIZE = 1
                     MODE = 1
-                    PAYLOAD_SIZE -= 1
                     break
-                elif MODE == 1:
-                    PAYLOAD_SIZE -= 1
-                    break
+                # Exponentially reduce payload size
+                elif MODE == 2:
+                    PL_FACTOR = PL_FACTOR*2
+                    PAYLOAD_SIZE -= PL_FACTOR
             
             # Queue size error
             elif queueCounter != QUEUE_SIZE:
