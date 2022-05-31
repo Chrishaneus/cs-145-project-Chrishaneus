@@ -151,7 +151,7 @@ while True:
                     MODE = 1
                     break
                 # Exponentially reduce payload size
-                elif MODE == 2:
+                elif MODE == 1:
                     PL_FACTOR = PL_FACTOR*2
                     PAYLOAD_SIZE -= PL_FACTOR
             
