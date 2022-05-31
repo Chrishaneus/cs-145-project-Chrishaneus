@@ -96,7 +96,7 @@ while True:
 
             # Get current expected message to be acked
             idMsg, snMsg, txnMsg, zMsg, plMsg = argsp.parse_packet(message)
-            queueCounter += 1
+            # queueCounter += 1
 
             # Check Acked packet
             print(snServer)
@@ -128,10 +128,10 @@ while True:
             #     payloadChange = 0
             #     MODE = 0
 
-            # Increment QUEUE
-            if QUEUE_MODE == 0 and queueCounter == QUEUE_SIZE:
-                VALID_QSIZE = QUEUE_SIZE
-                QUEUE_SIZE += 1
+            # # Increment QUEUE
+            # if QUEUE_MODE == 0 and queueCounter == QUEUE_SIZE:
+            #     VALID_QSIZE = QUEUE_SIZE
+            #     QUEUE_SIZE += 1
 
             # Check if last packet is ACKED
             if zMsg == '1':
@@ -155,13 +155,13 @@ while True:
                     PL_FACTOR = PL_FACTOR*2
                     PAYLOAD_SIZE -= PL_FACTOR
             
-            # Queue size error
-            elif queueCounter != QUEUE_SIZE:
-                #QUEUE_SIZE = VALID_QSIZE
-                QUEUE_SIZE -= 1
-                print("packet loss! decreased queue size")
-                if QUEUE_MODE == 0: QUEUE_MODE = 1
-                break
+            # # Queue size error
+            # elif queueCounter != QUEUE_SIZE:
+            #     #QUEUE_SIZE = VALID_QSIZE
+            #     QUEUE_SIZE -= 1
+            #     print("packet loss! decreased queue size")
+            #     if QUEUE_MODE == 0: QUEUE_MODE = 1
+            #     break
                 
     if breakOuter:
         break
