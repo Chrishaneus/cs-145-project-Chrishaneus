@@ -113,8 +113,8 @@ while True:
             # Processing delay
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
-                clientSock.settimeout(PROCESSING+latency)
-                PAYLOAD_SIZE = int(length//(95/(PROCESSING-latency)))
+                clientSock.settimeout(PROCESSING+latency+0.5)
+                PAYLOAD_SIZE = int(length//(80/(PROCESSING-latency)))
                 payloadChange = 0
                 print("Delay:", PROCESSING, PAYLOAD_SIZE)
             
@@ -157,7 +157,8 @@ while True:
             
             # Queue size error
             elif queueCounter != QUEUE_SIZE:
-                QUEUE_SIZE = VALID_QSIZE
+                #QUEUE_SIZE = VALID_QSIZE
+                QUEUE_SIZE -= QUEUE_SIZE
                 print("packet loss! decreased queue size")
                 if QUEUE_MODE == 0: QUEUE_MODE = 1
                 break
