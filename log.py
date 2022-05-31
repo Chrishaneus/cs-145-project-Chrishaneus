@@ -1,4 +1,5 @@
 def add(text):
+    print(text)
     f = open("log.txt", "a")
     f.write(text+'\n')
     f.close()
