@@ -158,7 +158,7 @@ while True:
             # Queue size error
             elif queueCounter != QUEUE_SIZE:
                 #QUEUE_SIZE = VALID_QSIZE
-                QUEUE_SIZE -= QUEUE_SIZE
+                QUEUE_SIZE -= 1
                 print("packet loss! decreased queue size")
                 if QUEUE_MODE == 0: QUEUE_MODE = 1
                 break
