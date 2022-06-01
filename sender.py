@@ -23,6 +23,7 @@ file    = open(args['f'], 'r')
 lines   = [line for line in file]
 payload = "\n".join(lines)
 length  = sum(map(len, lines))
+print("total length:",length)
 file.close()
 
 # Create socket and initialize server address
@@ -33,19 +34,20 @@ clientSock.bind(('',int(args['c'])))
 
 # Processing delay
 PROCESSING      = 20
-
 # Paylod logic
 INIT_PSIZE      = 1
 PAYLOAD_SIZE    = INIT_PSIZE
 VALID_PSIZE     = 1
 PL_FACTOR       = 1
 MODE            = 0
-
 # Queue logic
 QUEUE           = []
 QUEUE_SIZE      = 1
-QUEUE_MODE      = 0
 VALID_QSIZE     = 1
+QUEUE_MODE      = 0
+
+# Set initial timeout
+clientSock.settimeout(PROCESSING)
 
 # Initialize transaction
 latency_time = time.time()
@@ -58,6 +60,7 @@ print("latency:",latency)
 # Log transaction to log file
 transactionID = transactionID.decode()
 log.add(transactionID+"|"+UDP_IP_ADDRESS)
+if transactionID == "Existing alive transaction": os._exit(0)
 
 # Set and initialize variables
 seqnum, id, txn = 0, args['i'], transactionID
@@ -72,6 +75,7 @@ while payload:
 
     # Conditional exit
     if time.time() - start_time > 130:
+        print("Failed to send payload on time")
         clientSock.close()
         os._exit(0)
 
@@ -117,19 +121,29 @@ while payload:
             # Adjust to incorrect packet
             if (snMsg != snServer):
                 if (argsp.compute_checksum(message) != chksum):
+                    print("not the expected ACK!")
+                    
+                    # Received late
+                    if int(snServer) < int(snMsg): continue
+                    
+                    # Not the expected packet > SN
                     seqnum += (int(snServer)-int(snMsg)+1)
                     payload = payload[size:]
+                    queueCounter += 1
+                    
                     for i in range(int(snServer)-int(snMsg)):
                         message, z, size = QUEUE.pop(0)
                         payload = payload[size:]
+                    continue
+
                 else: seqnum += 1
             else: seqnum += 1
 
             # Update payload and sequence number
             payload = payload[size:]
 
-            # Adjust queue size (NOTE FOR TOMORROW: DO NOT STARTING FROM PACKET 1 IF TIME > 5)
-            if QUEUE_MODE == 0:
+            # Adjust queue size
+            if QUEUE_MODE == 0 and PROCESSING < 4:
                 queueCounter += 1
                 QUEUE_SIZE += 1
 
@@ -137,7 +151,7 @@ while payload:
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
                 clientSock.settimeout(PROCESSING+latency+0.25)
-                PAYLOAD_SIZE = int(length//(80/(PROCESSING-latency)))
+                PAYLOAD_SIZE = int(length//(80/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((90-PROCESSING)/(PROCESSING-latency)))
                 print("Delay:", PROCESSING, "PAYLOAD SIZE:", PAYLOAD_SIZE)
 
             # Payload logic

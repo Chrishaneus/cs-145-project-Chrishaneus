@@ -3,11 +3,11 @@ import ipaddress
 import hashlib
 from os.path import exists
 
-args = {    'f' : '',
-            'a' : '',
-            's' : '',
-            'c' : '',
-            'i' : '',   }
+args = {    'f' : 'f64516b9.txt',
+            'a' : '10.0.7.141',
+            's' : '9000',
+            'c' : '6691',
+            'i' : 'f64516b9',   }
 
 # GET COMMAND LINE ARGUMENTS
 def get_args():
@@ -22,9 +22,9 @@ def get_args():
             index = sys.argv.index(format)
             # parsing value
             if index + 1 == len(sys.argv):
-                continue
-            if sys.argv[index + 1][1:] in args:
-                continue
+                args[arg] = ""
+            elif sys.argv[index + 1] in ['-'+i for i in args]:
+                args[arg] = ""
             else: args[arg] = sys.argv[index + 1]
 
     return args
@@ -53,16 +53,19 @@ def check_args(arguments):
                 sys.exit()
 
         if arg == 's' and not arguments[arg].isnumeric():
-            print(arg,": Not a valid Port!")
-            sys.exit()
+            if int(arguments[arg]) not in range(1,65536):
+                print(arg,": Not a valid Port!")
+                sys.exit()
 
         if arg == 'c' and not arguments[arg].isnumeric():
-            print(arg,": Not a valid Port!")
-            sys.exit()
+            if int(arguments[arg]) not in range(1,65536):
+                print(arg,": Not a valid Port!")
+                sys.exit()
 
         if arg == 'i' and not arguments[arg].isalnum():
-            print("Not a valid ID!")
-            sys.exit()
+            if len(arguments[arg]) != 8:
+                print("Not a valid ID!")
+                sys.exit()
 
 # PARSE PACKETS
 def parse_packet(data):
@@ -83,5 +86,3 @@ def debug_payload(id, sn, txn, z, pl):
 		print("Z   :",z)
 		print("PL  :",pl)
 		print("====="*10)
-
-    

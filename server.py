@@ -47,9 +47,9 @@ length 	= sum(map(len, lines))
 
 
 QUEUE			= []
-QUEUE_SIZE		= random.randint(2,4)
-PROCESSING		= random.uniform(5,12)
-PAYLOAD_SIZE 	= int(length//(95/PROCESSING))
+QUEUE_SIZE		= random.randint(2,8)
+PROCESSING		= random.uniform(1,10)
+PAYLOAD_SIZE 	= int(length//(75/PROCESSING))
 PAYLOAD			= ""
 SEQNUM			= 0
 
