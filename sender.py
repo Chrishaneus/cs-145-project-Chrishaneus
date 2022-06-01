@@ -130,7 +130,7 @@ while payload:
                     seqnum += (int(snServer)-int(snMsg)+1)
                     payload = payload[size:]
                     queueCounter += 1
-                    
+
                     for i in range(int(snServer)-int(snMsg)):
                         message, z, size = QUEUE.pop(0)
                         payload = payload[size:]
@@ -151,7 +151,7 @@ while payload:
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
                 clientSock.settimeout(PROCESSING+latency+0.25)
-                PAYLOAD_SIZE = int(length//(80/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((90-PROCESSING)/(PROCESSING-latency)))
+                PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))# int(length//(80/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((90-PROCESSING)/(PROCESSING-latency)))
                 print("Delay:", PROCESSING, "PAYLOAD SIZE:", PAYLOAD_SIZE)
 
             # Payload logic
