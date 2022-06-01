@@ -150,11 +150,12 @@ while payload:
             # Guess processing delay from packet 1 and processing time
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
-                clientSock.settimeout(PROCESSING+latency+1)
-                PAYLOAD_SIZE = int(length//(80/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))
+                clientSock.settimeout(PROCESSING+latency+0.75)
+                PAYLOAD_SIZE = int(length//(78/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))
                 print("Delay:", PROCESSING, "PAYLOAD SIZE:", PAYLOAD_SIZE)
 
             # Payload logic
+            if MODE == 0 and payloadChange: MODE = 3
             if MODE == 1 and payloadChange: MODE = 2
             if MODE == 2 and payloadChange:
                 VALID_PSIZE = PAYLOAD_SIZE
