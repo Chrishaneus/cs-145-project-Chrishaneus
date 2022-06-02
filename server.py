@@ -5,6 +5,7 @@ import hashlib
 import socket
 import string
 import random
+import math
 import time
 import sys
 
@@ -14,7 +15,6 @@ import Parser as argsp
 import log
 
 serverSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-serverSock.settimeout(30.0)
 serverSock.bind(('',9000))
 
 start_time = 10 * time.time()
@@ -40,19 +40,20 @@ class receiver_thread(threading.Thread):
 			except:
 				break
 
-file    = open('f64516b9.txt', 'r')
+file    = open('payload/test.txt', 'r')
 lines   = [line for line in file] #print(sum(map(len, lines)))
 payload = "\n".join(lines)
 length 	= sum(map(len, lines))
 
 
 QUEUE			= []
-QUEUE_SIZE		= random.randint(2,8)
+QUEUE_SIZE		= random.randint(1,8)
 PROCESSING		= random.uniform(1,10)
-PAYLOAD_SIZE 	= int(length//(75/PROCESSING))
+PAYLOAD_SIZE 	= math.ceil(length/(75/PROCESSING))
 PAYLOAD			= ""
 SEQNUM			= 0
 
+serverSock.settimeout(30)
 print(PAYLOAD_SIZE,PROCESSING,QUEUE_SIZE)
 
 receiverThread = receiver_thread(0, "receiver", QUEUE, QUEUE_SIZE)
@@ -66,7 +67,7 @@ while True:
 	# time limit
 	if time.time()-start_time > 120:
 		break
-	
+
 	# get data
 	queueLock.acquire()
 	data, addr = QUEUE[0]

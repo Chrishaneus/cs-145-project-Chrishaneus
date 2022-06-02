@@ -6,6 +6,7 @@ import hashlib
 import socket
 import string
 import random
+import math
 import time
 import sys
 import os
@@ -33,7 +34,7 @@ clientSock      = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 clientSock.bind(('',int(args['c'])))
 
 # Processing delay
-PROCESSING      = 20
+PROCESSING      = 95
 # Paylod logic
 INIT_PSIZE      = 1
 PAYLOAD_SIZE    = INIT_PSIZE
@@ -98,7 +99,7 @@ while payload:
         QUEUE.append([build_message,z,PAYLOAD_SIZE])
 
         # Make sure packets get sent in order
-        time.sleep(latency)
+        # time.sleep(latency)
 
         # Pressumed last packet
         if z == '1':
@@ -142,26 +143,29 @@ while payload:
             # Update payload and sequence number
             payload = payload[size:]
 
-            # Adjust queue size
-            if QUEUE_MODE == 0 and PROCESSING < 4:
-                queueCounter += 1
-                QUEUE_SIZE += 1
-
             # Guess processing delay from packet 1 and processing time
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
                 clientSock.settimeout(PROCESSING+latency+0.75)
-                PAYLOAD_SIZE = int(length//(78/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))
+                PAYLOAD_SIZE = math.ceil(length/(78/(PROCESSING-latency)))
+                # PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))
                 print("Delay:", PROCESSING, "PAYLOAD SIZE:", PAYLOAD_SIZE)
 
             # Payload logic
-            if MODE == 0 and payloadChange: MODE = 3
-            if MODE == 1 and payloadChange: MODE = 2
+            if MODE == 0 and payloadChange and seqnum-1: MODE = 3
+            if MODE == 1 and payloadChange:
+                if PROCESSING < 3: MODE = 2
+                else: MODE = 3
             if MODE == 2 and payloadChange:
                 VALID_PSIZE = PAYLOAD_SIZE
                 PAYLOAD_SIZE += PL_FACTOR
                 payloadChange = 0
                 PL_FACTOR *= 2
+
+            # Adjust queue size
+            if QUEUE_MODE == 0 and PROCESSING < 3 and MODE == 3:
+                queueCounter += 1
+                QUEUE_SIZE += 1
 
             # Exit program
             if zMsg == '1':
@@ -176,12 +180,12 @@ while payload:
             if queueCounter == 0:
                 # Wrong first guess
                 if MODE == 0:
-                    PAYLOAD_SIZE = int(PAYLOAD_SIZE*(3/4))
+                    PAYLOAD_SIZE = int(PAYLOAD_SIZE*(90/100))
                     MODE = 1
                     break
                 # Wrong correction
                 elif MODE == 1:
-                    PAYLOAD_SIZE = int(PAYLOAD_SIZE*(3/4))
+                    PAYLOAD_SIZE = int(PAYLOAD_SIZE*(90/100))
                     break
                 # Final correction
                 elif MODE == 2:
