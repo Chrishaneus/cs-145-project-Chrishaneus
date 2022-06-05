@@ -22,9 +22,9 @@ def get_args():
             index = sys.argv.index(format)
             # parsing value
             if index + 1 == len(sys.argv):
-                args[arg] = ""
+                continue
             elif sys.argv[index + 1] in ['-'+i for i in args]:
-                args[arg] = ""
+                continue
             else: args[arg] = sys.argv[index + 1]
 
     return args

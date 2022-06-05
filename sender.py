@@ -147,7 +147,8 @@ while payload:
             if int(snMsg) == 0:
                 PROCESSING = time.time() - start_time
                 clientSock.settimeout(PROCESSING+latency+0.75)
-                PAYLOAD_SIZE = math.ceil(length/(78/(PROCESSING-latency))) # PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))
+                PAYLOAD_SIZE = math.ceil(length/(78/(PROCESSING-latency)))
+                # PAYLOAD_SIZE = int(length//((85-PROCESSING)/(PROCESSING-latency)))
                 print("Delay:", PROCESSING, "PAYLOAD SIZE:", PAYLOAD_SIZE)
 
             # Payload logic
