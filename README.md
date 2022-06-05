@@ -49,8 +49,7 @@ A receiver can only accept payloads of up to a certain size, denoted in ASCII ch
 
 <!-- Built With -->
 ## Built With
-
-This project was developed using python, the necessary libraries/modules used are the following:
+This project was developed using python 3, the necessary libraries/modules used are the following:
 * socket    - socket instance and sending/receiving packets
 * time      - latency and processing time approximation
 * hashlib   - hashing and verification
@@ -63,18 +62,67 @@ This project was developed using python, the necessary libraries/modules used ar
 * random    - randomizes hidden parameters
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+<div id="getting-started"></div>
 
 <!-- Getting Started -->
 ## Getting Started
+Download/clone this repository and put the folder anywhere in your device. Open your terminal and check your IP address (local) using `ipconfig` (windows) or `ifconfig` (unix) and take note of this address. Create a .txt file and fill it with text (in one line if possible). Then, edit the `server.py` file in line `43` to the path of the created .txt file.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- Prerequisites -->
 ## Prerequisites
+You may install Visual Studio Code for ease of testing. Do note that the steps stated earlier are necessary for locally testing the implementation. Also, follow the <a href="#installation">installation section</a> if you need help with any installation issues.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
+<div id="installation"></div>
 
 <!-- Installation -->
 ## Installation
+For the project to work, you need an installation of <a href="https://www.python.org/downloads/">python</a> >= 3.5 in your device. If any of the aformentioned modules or libraries are not pre-installed with your python installation, you can use the following command in your terminal:
+
+````
+pip install <module name>
+````
+
+Once all needed modules are installed,  you can now proceed to the <a href="#usage">next</a> section.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
+<div id="usage"></div>
 
 <!-- Usage -->
 ## Usage
+__Take note of the following flags for the `sender.py` file:__
+* -f denotes the filename of the payload (default value: your id .txt e.g. CS143145.txt)
+* -a denotes the IP address of the receiver to be contacted (default value: 10.0.7.141; this is also the IP of the receiver that you will use when developing your project)
+* -s denotes the port used by the receiver (default value: 9000; this is also the port of the receiver that you will use when developing your project)
+* -c denotes the port used by the sender; this port is assigned per student, given at the same time as the unique ID (default value: your assigned port)
+* -i denotes the unique ID; this ID is assigned per student, given at the same time as the port assigned to the student (default value: your id e.g. CS143145)
+
+Note that if these fields are stated in the command line, it would be set to the default value. Also, if ever you entered the flag without any values it would set it to an empty string. If also for whatever reason, there are two flag instances in one command it would get the value for only the first flag.
+
+__For local testing you may do the following:__
+1. open two terminal instances (tmux, vscode terminals, etc.) and go the project's directory.
+2. take note of your local IP address you got in the <a href="#getting-started">getting started</a> section as well as the .txt file you entered to the server.
+3. run the following command in one terminal:
+````
+python3 server.py
+````
+4. run the following command in the next terminal:
+````
+python3 sender.py -f <path-to-txt-file> -a <your-IP-address> -s 9000 -c <port> -i <ID>
+````
+5. Wait and check the exchanges in the terminal between the client (sender) and server (receiver).
+
+> Note: the local server is defaulted to listen to port `9000`. The server is just suppose to be a replication of the server provided by the handlers of the project.
+
+__For other testing nethods:__
+1. open a terminal instance and go the project's directory.
+2. take note of the fields/flags you need including the file path, IP address of receiver, server port, client port, and ID.
+3. run the following command in the terminal:
+````
+python3 sender.py -f <path-to-txt-file> -a <your-IP-address> -s <server-port> -c <client-port> -i <ID>
+````
+4. verify through the server (or transaction history) the details of the transaction.
+
+> Note: a log.txt file was also provided to see the latest transaction ID made along with the address of the server.
