@@ -100,7 +100,7 @@ while True:
 			continue
 
 		# Incorrect ID
-		if UNIQUE_ID != id:
+		if UNIQUE_ID[2:] != id:
 			QUEUE.pop(0)
 			print('Wrong ID!',UNIQUE_ID,id)
 			continue
