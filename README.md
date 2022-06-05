@@ -79,7 +79,7 @@ You may install Visual Studio Code for ease of testing. Do note that the steps s
 
 <!-- Installation -->
 ## Installation
-For the project to work, you need an installation of <a href="https://www.python.org/downloads/">python</a> >= 3.5 in your device. If any of the aformentioned modules or libraries are not pre-installed with your python installation, you can use the following command in your terminal:
+For the project to work, you need an installation of <a href="https://www.python.org/downloads/">python</a> >= 3.5 in your device. The version that is installed in the AWS instance given was 3.10.4. If any of the aformentioned modules or libraries are not pre-installed with your python installation, you can use the following command in your terminal:
 
 ````
 pip install <module name>
