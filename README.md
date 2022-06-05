@@ -117,7 +117,7 @@ python3 sender.py -f <path-to-txt-file> -a <your-IP-address> -s 9000 -c <port> -
 
 > Note: the local server is defaulted to listen to port `9000`. The server is just suppose to be a replication of the server provided by the handlers of the project.
 
-__For other testing nethods:__
+__For other testing methods:__
 1. open a terminal instance and go the project's directory.
 2. take note of the fields/flags you need including the file path, IP address of receiver, server port, client port, and ID.
 3. run the following command in the terminal:
