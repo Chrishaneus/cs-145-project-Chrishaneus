@@ -52,6 +52,7 @@ PROCESSING		= random.uniform(1,10)
 PAYLOAD_SIZE 	= math.ceil(length/(75/PROCESSING))
 PAYLOAD			= ""
 SEQNUM			= 0
+UNIQUE_ID		= ""
 
 serverSock.settimeout(30)
 print(PAYLOAD_SIZE,PROCESSING,QUEUE_SIZE)
@@ -79,6 +80,7 @@ while True:
 		print("intent message:", data)
 		transactionID = ''.join(random.choice(string.digits) for _ in range(7))
 		serverSock.sendto(transactionID.encode(), (addr[0], addr[1]))
+		UNIQUE_ID = data
 		QUEUE.pop(0)
 
 	# Step Three: Sending the Payload or Data
@@ -88,13 +90,19 @@ while True:
 		# Incorrect payload size
 		if len(pl) > PAYLOAD_SIZE:
 			QUEUE.pop(0)
-			print('wrong payload size!')
+			print('wrong payload size!', PAYLOAD_SIZE, len(pl))
 			continue
 		
 		# Incorrect expected sequence number
 		if f'{SEQNUM:07d}' != sn:
 			QUEUE.pop(0)
 			print('not the expected sequence number!',f'{SEQNUM:07d}',sn)
+			continue
+
+		# Incorrect ID
+		if UNIQUE_ID != id:
+			QUEUE.pop(0)
+			print('Wrong ID!',UNIQUE_ID,id)
 			continue
 
 		# Processing Delay
