@@ -30,6 +30,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#others">Others</a></li>
   </ol>
 </details>
 
@@ -62,7 +63,6 @@ This project was developed using python 3, the necessary libraries/modules used 
 * random    - randomizes hidden parameters
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-<div id="getting-started"></div>
 
 <!-- Getting Started -->
 ## Getting Started
@@ -88,7 +88,6 @@ pip install <module name>
 Once all needed modules are installed,  you can now proceed to the <a href="#usage">next</a> section.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-<div id="usage"></div>
 
 <!-- Usage -->
 ## Usage
@@ -100,6 +99,8 @@ __Take note of the following flags for the `sender.py` file:__
 * -i denotes the unique ID; this ID is assigned per student, given at the same time as the port assigned to the student (default value: your id e.g. CS143145)
 
 Note that if these fields are stated in the command line, it would be set to the default value. Also, if ever you entered the flag without any values it would set it to an empty string. If also for whatever reason, there are two flag instances in one command it would get the value for only the first flag.
+
+> Note: the default values are set in the `Parser.py` module.
 
 __For local testing you may do the following:__
 1. open two terminal instances (tmux, vscode terminals, etc.) and go the project's directory.
@@ -126,3 +127,7 @@ python3 sender.py -f <path-to-txt-file> -a <your-IP-address> -s <server-port> -c
 4. verify through the server (or transaction history) the details of the transaction.
 
 > Note: a log.txt file was also provided to see the latest transaction ID made along with the address of the server.
+
+<!-- Others -->
+## Others
+the `.pcap` files included in the captures folder. In total there are $6$ tests in the `test_documentation.pcap` file and the first five are in the documentation. Additionally, there are $19$ additional consecutive tests done in the `test_additional.pcap` file.
