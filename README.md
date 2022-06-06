@@ -98,7 +98,7 @@ __Take note of the following flags for the `sender.py` file:__
 * -c denotes the port used by the sender; this port is assigned per student, given at the same time as the unique ID (default value: your assigned port)
 * -i denotes the unique ID; this ID is assigned per student, given at the same time as the port assigned to the student (default value: your id e.g. CS143145)
 
-Note that if these fields are stated in the command line, it would be set to the default value. Also, if ever you entered the flag without any values it would set it to an empty string. If also for whatever reason, there are two flag instances in one command it would get the value for only the first flag.
+Note that if these fields are stated in the command line, it would be set to the default value. Also, if ever you entered the flag without any values it would set it to default. If also for whatever reason, there are two flag instances in one command it would get the value for only the first flag.
 
 > Note: the default values are set in the `Parser.py` module.
 
@@ -130,4 +130,4 @@ python3 sender.py -f <path-to-txt-file> -a <your-IP-address> -s <server-port> -c
 
 <!-- Others -->
 ## Others
-the `.pcap` files included in the captures folder. In total there are $6$ tests in the `test_documentation.pcap` file and the first five are in the documentation. Additionally, there are $19$ additional consecutive tests done in the `test_additional.pcap` file.
+the `.pcap` files included in the captures folder. In total there are $6$ tests in the `test_documentation.pcap` file and the first five are in the documentation. Additionally, there are $19$ additional consecutive tests done in the `test_additional.pcap` file. The packets captured when testing the commands (which are also included in the documentation video) is in the `test_commands.pcap` file.
