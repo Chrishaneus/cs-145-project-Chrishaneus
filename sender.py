@@ -74,6 +74,10 @@ while payload:
     queueCounter = 0
     payloadChange = 1
 
+    # Gaurd against wrong indices
+    if PAYLOAD_SIZE < 1:
+        PAYLOAD_SIZE = 1
+
     # Conditional exit
     if time.time() - start_time > 130:
         print("Failed to send payload on time")
